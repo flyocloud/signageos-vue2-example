@@ -1,16 +1,23 @@
 {
-  "name": "signageos-vue2-example",
-  "main": "dist/index.html",
+  "name": "flyo-vue2-example",
   "version": "1.0.0",
-  "private": true,
+  "main": "dist/index.html",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "dev": "npm run build && npm run serve",
+    "upload": "sos applet upload",
+    "start": "sos applet start",
+    "release": "npm run build && npm run upload",
+    "es5": "npx es-check es5 dist/**/*.js"
   },
   "dependencies": {
-    "@signageos/front-applet": "^5.4.2",
-    "@signageos/front-display": "^9.21.1",
+    "@signageos/front-applet": "^5.4.1",
+    "@signageos/front-display": "9.20.0",
     "core-js": "^3.8.3",
     "vue": "^2.6.14"
   },
@@ -40,13 +47,9 @@
   },
   "browserslist": [
     "> 1%",
-    "last 2 versions",
-    "not dead"
-  ],
-  "vue": {
-    "publicPath": "./"
-  },
-  "sos": {
-    "appletUid": "55117ba747d44072014cedc9eb32f58074b89d7ad376748d8e"
-  }
+    "last 10 versions",
+    "not dead",
+    "safari >= 7"
+  ]
 }
+ 
