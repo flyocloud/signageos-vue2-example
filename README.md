@@ -19,4 +19,5 @@
 + use es5 check `"es5": "npx es-check es5 dist/**/*.js"` via `npm run es5`
 + test the applet with browser stack chromium version 60
 + don't use vue3
++ remove `type="module"` from index.html
 + box applet error `entry file not found` "solution": add or remove a space at the end of any line in the package.json file then build and reuoload again.
