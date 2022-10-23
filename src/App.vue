@@ -1,5 +1,10 @@
 <template>
-  <div class="carousel">
+  <div class="loading" v-if="isLoading">
+    <div class="logo">
+      <img width="200" class="blob" src="flyo.svg" />
+    </div>
+  </div>
+  <div class="carousel" v-else>
     <div
       v-for="(slide, index) in slides"
       :key="slide.entity_id"
@@ -25,8 +30,8 @@ export default {
       api: null,
       activeIndex: 0,
       slides: [],
-      timeout: 15000,
-      intervalInstance: null
+      intervalInstance: null,
+      isLoading: true
     }
   },
   methods: {
@@ -39,8 +44,8 @@ export default {
         itemData.uid = `${itemData.uid}-${itemData.entity_id}`
         itemData.uri = `${itemData.image}`
         try {
-          itemData.filePath = (await sos.offline.cache.loadOrSaveFile(itemData.uid, itemData.uri)).filePath
-          //itemData.filePath = itemData.uri
+          //itemData.filePath = (await sos.offline.cache.loadOrSaveFile(itemData.uid, itemData.uri)).filePath
+          itemData.filePath = itemData.uri
         } catch (e) {
           console.log('error', e)
           itemData.filePath = itemData.uri
@@ -48,7 +53,11 @@ export default {
       }
 
       this.slides = responseJson.data
-      this.timeout = responseJson?.config?.timeout || 15000
+      const timeout = responseJson?.config?.timeout || 15000
+      this.isLoading = false
+      this.intervalInstance = setInterval(() => {
+        this.progressActiveIndex()
+      }, timeout)
     },
 
     progressActiveIndex: async function () {
@@ -58,29 +67,13 @@ export default {
         this.activeIndex += 1
       }
     }
-
-  },
-  watch: {
-    timeout: function(newVal) {
-      if (this.intervalInstance) {
-        clearInterval(this.intervalInstance)
-      }
-
-      this.intervalInstance = setInterval(() => {
-        this.progressActiveIndex()
-      }, newVal)
-    }
   },
   beforeMount() {
-    this.api = sos?.config?.api || 'test.api'
+    this.api = sos?.config?.api || 'https://api.flyo.cloud/integration/signageos/29/WZWj7lyl9dQ80PugsYZNh3-B25Q8glwmenBwrmhvFf9bG-aQYxW18sKsmc2-RtIMvz0SiqyWVHBwiSyKRNjTD5GKbniW'
   },
   mounted() {
     this.loadSlides()
-    this.intervalInstance = setInterval(() => {
-      this.progressActiveIndex()
-    }, this.timeout)
   }
-  
 }
 </script>
 
@@ -107,6 +100,9 @@ export default {
 </style>
 
 <style>
+html, body {
+  height: 100%;
+}
 body {
   background-color:white;
   padding: 0;
@@ -114,9 +110,41 @@ body {
   font-family: 'Krete', sans-serif;
 }
 
+.loading {
+  height: 100%;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo {
+  width: 100px;
+  height: 100px;
+}
+
 *,
 *::before,
 *::after {
   box-sizing: border-box;
+}
+
+.blob {
+	animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+	0% {
+		transform: scale(0.95);
+	}
+
+	70% {
+		transform: scale(1);
+	}
+
+	100% {
+		transform: scale(0.95);
+	}
 }
 </style>
