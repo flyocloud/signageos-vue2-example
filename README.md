@@ -2,8 +2,8 @@
 
 ## Development:
 
-+ For local development, uncomment sos code then `npm run serve`
-+ For preview in emulator use `npm run dev` and `npm run start` afterwards. Each change requires you to restart the applet
++ For local development, [uncomment SOS code](https://github.com/flyocloud/signageos-vue2-example/pull/1/files) then `npm run serve`
++ For preview in emulator use `npm run dev` and run `npm run start` afterwards. Each change requires you to restart the applet
 
 ## Setup (Once)
 
