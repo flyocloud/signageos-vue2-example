@@ -44,8 +44,8 @@ export default {
         itemData.uid = `${itemData.uid}-${itemData.entity_id}`
         itemData.uri = `${itemData.image}`
         try {
-          //itemData.filePath = (await sos.offline.cache.loadOrSaveFile(itemData.uid, itemData.uri)).filePath
-          itemData.filePath = itemData.uri
+          itemData.filePath = (await sos.offline.cache.loadOrSaveFile(itemData.uid, itemData.uri)).filePath
+          //itemData.filePath = itemData.uri
         } catch (e) {
           console.log('error', e)
           itemData.filePath = itemData.uri
