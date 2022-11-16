@@ -7,7 +7,7 @@
   <div class="carousel" v-else>
     <div
       v-for="(slide, index) in slides"
-      :key="slide.entity_id"
+      :key="`${index}${slide.entity_id}`"
       class="carousel__item"
       :class="{ 'carousel__item--active': activeIndex === index }"
     >
@@ -36,23 +36,32 @@ export default {
   },
   methods: {
 
-    loadSlides: async function() {
+    async loadSlides() {
       var response = await fetch(this.api)
       var responseJson = await response.json()
-
+      var slides = []
       for (var itemData of responseJson.data) {
-        itemData.uid = `${itemData.uid}-${itemData.entity_id}`
-        itemData.uri = `${itemData.image}`
+
+        // check for empty image
+        if (!itemData.image || itemData.image.length == 0) {
+          continue;
+        }
+
+        var slideItem = itemData
+        slideItem.uid = `${itemData.uid}-${itemData.entity_id}`
+        slideItem.uri = `${itemData.image}`
         try {
-          itemData.filePath = (await sos.offline.cache.loadOrSaveFile(itemData.uid, itemData.uri)).filePath
-          //itemData.filePath = itemData.uri
+          slideItem.filePath = (await sos.offline.cache.loadOrSaveFile(itemData.uid, itemData.uri)).filePath
+          //slideItem.filePath = itemData.uri
         } catch (e) {
           console.log('error', e)
-          itemData.filePath = itemData.uri
+          continue;
         }
+
+        slides.push(slideItem)
       }
 
-      this.slides = responseJson.data
+      this.slides = slides
       const timeout = responseJson?.config?.timeout || 15000
       this.isLoading = false
       this.intervalInstance = setInterval(() => {
@@ -60,7 +69,7 @@ export default {
       }, timeout)
     },
 
-    progressActiveIndex: async function () {
+    async progressActiveIndex() {
       if ((this.activeIndex + 1) == this.slides.length) {
         this.activeIndex = 0
       } else {
