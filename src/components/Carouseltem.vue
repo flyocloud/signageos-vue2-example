@@ -4,14 +4,18 @@
     <div class="carousel-item__overlay">
       <div class="carousel-text-overlay">
         <div class="carousel-text-overlay__content">
-          <div class="carousel-text-overlay__teaser">
-            {{ data.teaser }}
+          <div v-if="data.teaser && data.teaser.length > 0">
+            <div class="carousel-text-overlay__teaser">
+              {{ data.teaser }}
+            </div>
           </div>
-          <div class="carousel-text-overlay__title">
-            {{ truncatedTitle }}
+          <div v-if="data.title && data.title.length > 0">
+            <div class="carousel-text-overlay__title">
+              {{ truncatedTitle }}
+            </div>
           </div>
         </div>
-        <div class="carousel-text-overlay__qr">
+        <div class="carousel-text-overlay__qr" v-if="data.qrcode && data.qrcode.length > 0">
             <img
                 class="carousel-text-overlay__qr-image"
                 v-if="data.qrcode"
@@ -33,7 +37,7 @@ export default {
   },
   computed: {
     truncatedTitle: function() {
-        if (this.data.title.length > 40) {
+        if (this.data.title && this.data.title.length > 40) {
             return this.data.title.slice(0, 37) + '...'
         }
 
