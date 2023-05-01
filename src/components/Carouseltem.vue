@@ -10,9 +10,10 @@
             </div>
           </div>
           <div v-if="data.title && data.title.length > 0">
-            <div class="carousel-text-overlay__title">
-              {{ truncatedTitle }}
-            </div>
+            <div 
+              class="carousel-text-overlay__title"
+              :class="titleSizeClass"  
+            >{{ data.title }}</div>
           </div>
         </div>
         <div class="carousel-text-overlay__qr" v-if="data.qrcode && data.qrcode.length > 0">
@@ -36,14 +37,15 @@ export default {
     }
   },
   computed: {
-    truncatedTitle: function() {
-        if (this.data.title && this.data.title.length > 40) {
-            return this.data.title.slice(0, 37) + '...'
+    titleSizeClass: function() {
+        if (this.data.title.length > 35) {
+            return 'carousel-text-overlay__title--50'
+        } else if (this.data.title.length > 25) {
+            return 'carousel-text-overlay__title--75'
+        } else {
+            return ''
         }
-
-        return this.data.title
-    },
-
+    }
   }
 }
 </script>
@@ -108,6 +110,14 @@ export default {
     color: #000;
     font-weight: 700;
     padding: .5vw .7vw;
+}
+
+.carousel-text-overlay__title--75 {
+    font-size: 3.375vw;
+}
+
+.carousel-text-overlay__title--50 {
+    font-size: 2.25vw;
 }
 
 .carousel-text-overlay__qr {
