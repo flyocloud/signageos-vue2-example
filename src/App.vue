@@ -51,14 +51,19 @@ export default {
         slideItem.uid = `${itemData.uid}-${itemData.entity_id}`
         slideItem.uri = `${itemData.image}`
         try {
-          slideItem.filePath = (await sos.offline.cache.loadOrSaveFile(itemData.uid, itemData.uri)).filePath
+          
+          // signageos approach
+          const cacheResponse = await sos.offline.cache.loadOrSaveFile(itemData.uid, itemData.uri)
+          slideItem.filePath = cacheResponse.filePath
+
+          // local testing approach
           //slideItem.filePath = itemData.uri
+
+          // push slide only on success
+          slides.push(slideItem)
         } catch (e) {
           console.log('error', e)
-          continue;
         }
-
-        slides.push(slideItem)
       }
 
       this.slides = slides
