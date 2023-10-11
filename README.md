@@ -16,8 +16,8 @@
 
 ## Important Notes
 
-+ use es5 check `"es5": "npx es-check es5 dist/**/*.js"` via `npm run es5`
-+ test the applet with browser stack chromium version 60
-+ don't use vue3
-+ remove `type="module"` from index.html
-+ box applet error `entry file not found` "solution": add or remove a space at the end of any line in the package.json file then build and reuoload again.
++ Use es5 check `"es5": "npx es-check es5 dist/**/*.js"` via `npm run es5` (build the project first using `npm run build` otherwise the dist folder is empty)
++ Don't use vue3
++ Remove `type="module"` from index.html if present in dist or public folder
++ When having problems with preview emulator, log in into the box and remove all applets from the emulator first, then run `npm run dev` and `npm run start` afterwards.
++ (Seems to be fixed) Box applet error `entry file not found` "solution": add or remove a space at the end of any line in the package.json file then build and reuoload again.
