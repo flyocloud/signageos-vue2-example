@@ -48,7 +48,7 @@ export default {
         }
 
         var slideItem = itemData
-        slideItem.uid = `${itemData.uid}-${itemData.entity_id}`
+        slideItem.uid = itemData.image.replace(/[^a-zA-Z0-9]/gi, '');
         slideItem.uri = `${itemData.image}`
         try {
           
