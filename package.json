@@ -16,20 +16,20 @@
     "es5": "npx es-check es5 dist/**/*.js"
   },
   "dependencies": {
-    "@signageos/front-applet": "^5.4.1",
-    "@signageos/front-display": "9.20.0",
-    "core-js": "^3.8.3",
+    "@signageos/front-applet": "^5.12.2",
+    "@signageos/front-display": "9.23.0",
+    "core-js": "^3.37.0",
     "vue": "^2.6.14"
   },
   "devDependencies": {
-    "@babel/core": "^7.12.16",
-    "@babel/eslint-parser": "^7.12.16",
-    "@vue/cli-plugin-babel": "~5.0.0",
-    "@vue/cli-plugin-eslint": "~5.0.0",
-    "@vue/cli-service": "~5.0.0",
+    "@babel/core": "^7.24.4",
+    "@babel/eslint-parser": "^7.24.1",
+    "@vue/cli-plugin-babel": "~5.0.8",
+    "@vue/cli-plugin-eslint": "~5.0.8",
+    "@vue/cli-service": "~5.0.8",
     "eslint": "^7.32.0",
-    "eslint-plugin-vue": "^8.0.3",
-    "vue-template-compiler": "^2.6.14"
+    "eslint-plugin-vue": "^8.7.1",
+    "vue-template-compiler": "^2.7.16"
   },
   "eslintConfig": {
     "root": true,
