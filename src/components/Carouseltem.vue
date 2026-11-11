@@ -1,6 +1,18 @@
 <template>
   <div class="carousel-item">
-    <img class="carousel-item__image" :src="data.filePath || data.image" />
+    <video
+      v-if="isVideo"
+      ref="video"
+      class="carousel-item__image"
+      :src="videoSrc"
+      :loop="loop"
+      muted
+      playsinline
+      preload="auto"
+      @ended="onVideoEnded('ended')"
+      @error="onVideoEnded('error')"
+    />
+    <img v-else class="carousel-item__image" :src="data.filePath || data.image" />
     <div class="carousel-item__overlay">
       <div class="carousel-text-overlay">
         <div class="carousel-text-overlay__content">
@@ -29,14 +41,173 @@
 </template>
 
 <script>
+import { log } from '../log'
+
 export default {
   name: 'CarouselItem',
   props: {
     data: {
       type: Object
+    },
+    isActive: {
+      type: Boolean,
+      default: false
+    },
+    // Only one slide in the playlist: the video loops instead of ending,
+    // otherwise it would stop on its last frame (activeIndex never changes).
+    loop: {
+      type: Boolean,
+      default: false
+    }
+  },
+  emits: ['video-ended'],
+  data() {
+    return {
+      videoSrc: null,
+      videoFailed: false,
+      canPlayHandler: null
+    }
+  },
+  watch: {
+    isActive(isActive) {
+      if (!this.isVideo) {
+        return
+      }
+
+      if (isActive) {
+        this.playVideo()
+      } else {
+        this.resetVideo()
+      }
+    }
+  },
+  mounted() {
+    // NOTE: don't force the video onto its own GPU layer (e.g. translateZ(0)).
+    // On Tizen that promotes the <video> to a hardware overlay plane rendered
+    // behind the page, so the first frame flashes and then vanishes.
+    if (this.isVideo) {
+      this.loadVideoBlob()
+    }
+  },
+  beforeDestroy() {
+    this.removeCanPlayHandler()
+    if (this.videoSrc) {
+      URL.revokeObjectURL(this.videoSrc)
+    }
+  },
+  methods: {
+    // The offline cache serves files over a service worker route
+    // (/indexed_db/...) that answers Range requests with a full 200 instead
+    // of a 206. Safari-based webviews corrupt their buffered ranges against
+    // that and the video freezes a few frames in, without any error event.
+    // Fetching the file once and playing it from a blob: URL avoids the
+    // service worker path and its broken Range handling entirely.
+    async loadVideoBlob() {
+      const url = this.data.filePath || this.data.image
+      try {
+        const response = await fetch(url)
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`)
+        }
+        const blob = await response.blob()
+        this.videoSrc = URL.createObjectURL(blob)
+        await this.$nextTick()
+        if (this.isActive) {
+          this.playVideo()
+        }
+      } catch (error) {
+        this.videoFailed = true
+        log({
+          type: 'Video.LoadFailed',
+          url: this.data.uri,
+          message: String(error)
+        })
+        this.onVideoEnded('load-failed')
+      }
+    },
+
+    playVideo() {
+      // a video that could not be loaded is skipped right away instead of
+      // showing a black slide until the safety timer kicks in
+      if (this.videoFailed) {
+        this.onVideoEnded('load-failed')
+        return
+      }
+
+      const video = this.$refs.video
+      if (!video) {
+        return
+      }
+
+      // Calling play() before the video has buffered enough can silently fail
+      // on embedded webviews (AbortError race), so wait for 'canplay' first.
+      if (video.readyState < 3) {
+        this.removeCanPlayHandler()
+        this.canPlayHandler = () => {
+          this.removeCanPlayHandler()
+          if (this.isActive) {
+            this.playVideo()
+          }
+        }
+        video.addEventListener('canplay', this.canPlayHandler)
+        return
+      }
+
+      video.currentTime = 0
+      const playResult = video.play()
+      if (playResult && typeof playResult.then === 'function') {
+        playResult.catch((error) => {
+          this.onVideoEnded('play-rejected: ' + String(error))
+        })
+      }
+    },
+
+    resetVideo() {
+      this.removeCanPlayHandler()
+      const video = this.$refs.video
+      if (!video) {
+        return
+      }
+
+      video.pause()
+      video.currentTime = 0
+    },
+
+    removeCanPlayHandler() {
+      const video = this.$refs.video
+      if (video && this.canPlayHandler) {
+        video.removeEventListener('canplay', this.canPlayHandler)
+      }
+      this.canPlayHandler = null
+    },
+
+    onVideoEnded(reason) {
+      // Only log when something went wrong: a regular end happens on every
+      // playback and would flood the log stream. A failed load is already
+      // logged once as Video.LoadFailed and is not repeated on every skip.
+      if (reason !== 'ended' && reason !== 'load-failed') {
+        const video = this.$refs.video
+        log({
+          type: 'Video.Ended',
+          url: this.data.uri,
+          reason: reason,
+          isActive: this.isActive,
+          currentTime: video ? video.currentTime : null,
+          errorCode: video && video.error ? video.error.code : null
+        })
+      }
+
+      if (!this.isActive) {
+        return
+      }
+
+      this.$emit('video-ended')
     }
   },
   computed: {
+    isVideo() {
+      return Boolean(this.data.isVideo)
+    },
     titleSizeClass: function() {
         if (this.data.title.length > 35) {
             return 'carousel-text-overlay__title--50'
